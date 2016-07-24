@@ -26,6 +26,11 @@ bool ofxDatGuiLog::mQuiet = false;
 string ofxDatGuiTheme::AssetPath = "";
 std::unique_ptr<ofxDatGuiTheme> ofxDatGuiComponent::theme;
 
+
+void ofxDatGuiComponent::setMouseLocation(int x, int y) {
+    mouseLocation.set(x, y);
+}
+
 ofxDatGuiComponent::ofxDatGuiComponent(string label)
 {
     mName = label;
@@ -332,7 +337,7 @@ void ofxDatGuiComponent::update(bool acceptEvents)
 {
     if (acceptEvents && mEnabled && mVisible){
         bool mp = ofGetMousePressed();
-        ofPoint mouse = ofPoint(ofGetMouseX() - mMask.x, ofGetMouseY() - mMask.y);
+        ofPoint mouse = ofPoint(mouseLocation.x - mMask.x, mouseLocation.y - mMask.y);
         if (hitTest(mouse)){
             if (!mMouseOver){
                 onMouseEnter(mouse);
@@ -361,6 +366,7 @@ void ofxDatGuiComponent::update(bool acceptEvents)
 // don't update children unless they're visible //
     if (this->getIsExpanded()) {
         for(int i=0; i<children.size(); i++) {
+            children[i]->setMouseLocation((int) mouseLocation.x, (int) mouseLocation.y);
             children[i]->update(acceptEvents);
             if (children[i]->getFocused()){
                 if (acceptEvents == false ) children[i]->setFocused(false);

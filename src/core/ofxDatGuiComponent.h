@@ -26,10 +26,13 @@
 class ofxDatGuiComponent : public ofxDatGuiInteractiveObject
 {
     public:
-    
+
+        ofVec2f mouseLocation;
+        virtual void setMouseLocation(int x, int y);
+
         ofxDatGuiComponent(string label);
         virtual ~ofxDatGuiComponent();
-    
+
         int     getX();
         int     getY();
         void    setIndex(int index);
@@ -37,24 +40,24 @@ class ofxDatGuiComponent : public ofxDatGuiInteractiveObject
         void    setName(string name);
         string  getName();
         bool    is(string name);
-    
+
         void    setLabel(string label);
         void    setLabelColor(ofColor color);
         string  getLabel();
-    
+
         void    setBackgroundColor(ofColor color);
         void    setBackgroundColorOnMouseOver(ofColor color);
         void    setBackgroundColorOnMouseDown(ofColor color);
         void    setBackgroundColors(ofColor bkgd, ofColor mOver, ofColor mDown);
-    
+
         void    setStripe(ofColor color, int width);
         void    setStripeWidth(int width);
         void    setStripeColor(ofColor color);
         void    setStripeVisible(bool visible);
-    
+
         void    setBorder(ofColor color, int width);
         void    setBorderVisible(bool visible);
-    
+
         void    setMask(const ofRectangle &mask);
         void    setAnchor(ofxDatGuiAnchor anchor);
         void    setEnabled(bool visible);
@@ -66,9 +69,9 @@ class ofxDatGuiComponent : public ofxDatGuiInteractiveObject
         void    setOpacity(float opacity);
         bool    getMouseDown();
         ofxDatGuiType getType();
-    
+
         vector<ofxDatGuiComponent*> children;
-    
+
         virtual void draw();
         virtual void update(bool acceptEvents = true);
         virtual bool hitTest(ofPoint m);
@@ -77,13 +80,13 @@ class ofxDatGuiComponent : public ofxDatGuiInteractiveObject
         virtual void setTheme(const ofxDatGuiTheme* theme) = 0;
         virtual void setWidth(int width, float labelWidth);
         virtual void setLabelAlignment(ofxDatGuiAlignment align);
-    
+
         virtual int  getWidth();
         virtual int  getHeight();
         virtual bool getIsExpanded();
         virtual void drawColorPicker();
 
-        virtual void onFocus();    
+        virtual void onFocus();
         virtual void onFocusLost();
         virtual void onWindowResized();
         virtual void onKeyPressed(int key);
@@ -96,9 +99,9 @@ class ofxDatGuiComponent : public ofxDatGuiInteractiveObject
         void onWindowResized(ofResizeEventArgs &e);
 
         static const ofxDatGuiTheme* getTheme();
-    
+
     protected:
-    
+
         int x;
         int y;
         int mIndex;
@@ -113,7 +116,7 @@ class ofxDatGuiComponent : public ofxDatGuiInteractiveObject
         ofxDatGuiAnchor mAnchor;
         shared_ptr<ofxSmartFont> mFont;
         static unique_ptr<ofxDatGuiTheme> theme;
-    
+
         struct{
             float width;
             float height;
@@ -138,7 +141,7 @@ class ofxDatGuiComponent : public ofxDatGuiInteractiveObject
             } stripe;
             ofColor guiBackground;
         } mStyle;
-    
+
         struct{
             int x;
             string text;
@@ -152,20 +155,22 @@ class ofxDatGuiComponent : public ofxDatGuiInteractiveObject
             bool forceUpperCase;
             ofxDatGuiAlignment alignment;
         } mLabel;
-    
+
         struct {
             int x;
             int y;
             int size;
             ofColor color;
         } mIcon;
-    
+
         void drawLabel();
         void drawBorder();
         void drawStripe();
         void drawBackground();
         void positionLabel();
         void setComponentStyle(const ofxDatGuiTheme* t);
-    
+
+
+
 };
 

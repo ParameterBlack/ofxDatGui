@@ -35,6 +35,7 @@ class ofxDatGui : public ofxDatGuiInteractiveObject
     
         void draw();
         void update();
+        void update(int x, int y);
         void focus();
         void expand();
         void toggle();
@@ -126,9 +127,9 @@ class ofxDatGui : public ofxDatGuiInteractiveObject
         ofxDatGuiAlignment mAlignment;
         vector<ofxDatGuiComponent*> items;
         vector<ofxDatGuiComponent*> trash;
-        static ofxDatGui* mActiveGui;
-        static vector<ofxDatGui*> mGuis;
-        static unique_ptr<ofxDatGuiTheme> theme;
+        ofxDatGui* mActiveGui; // Removed Static
+        vector<ofxDatGui*> mGuis; // Removed Static
+        unique_ptr<ofxDatGuiTheme> theme; // Removed Static
     
         void init();
         void layoutGui();

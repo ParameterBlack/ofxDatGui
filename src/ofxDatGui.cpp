@@ -22,8 +22,8 @@
 
 #include "ofxDatGui.h"
 
-ofxDatGui* ofxDatGui::mActiveGui;
-vector<ofxDatGui*> ofxDatGui::mGuis;
+//ofxDatGui* ofxDatGui::mActiveGui; // REMOVED, NO LONGER STATIC
+//vector<ofxDatGui*> ofxDatGui::mGuis; // REMOVED, NO LONGER STATIC
 
 ofxDatGui::ofxDatGui(int x, int y)
 {
@@ -817,6 +817,90 @@ void ofxDatGui::layoutGui()
     update & draw loop
 */
 
+void ofxDatGui::update(int x, int y) {
+    if (!mVisible) return;
+
+    // check if we need to update components //
+    for (int i=0; i<items.size(); i++) {
+        if (mAlphaChanged) items[i]->setOpacity(mAlpha);
+        if (mThemeChanged) items[i]->setTheme(mTheme);
+        if (mWidthChanged) items[i]->setWidth(mWidth, mLabelWidth);
+        if (mAlignmentChanged) items[i]->setLabelAlignment(mAlignment);
+    }
+
+    if (mThemeChanged || mWidthChanged) layoutGui();
+
+    mTheme = nullptr;
+    mAlphaChanged = false;
+    mWidthChanged = false;
+    mThemeChanged = false;
+    mAlignmentChanged = false;
+
+    // check for gui focus change //
+    if (ofGetMousePressed() && mActiveGui->mMoving == false){
+        ofPoint mouse = ofPoint(x, y);
+        for (int i=mGuis.size()-1; i>-1; i--){
+            // ignore guis that are invisible //
+            if (mGuis[i]->getVisible() && mGuis[i]->hitTest(mouse)){
+                if (mGuis[i] != mActiveGui) mGuis[i]->focus();
+                break;
+            }
+        }
+    }
+
+    if (!getFocused() || !mEnabled){
+        // update children but ignore mouse & keyboard events //
+        for (int i=0; i<items.size(); i++) {
+            items[i]->setMouseLocation(x, y);
+            items[i]->update(false);
+        }
+    }   else {
+        mMoving = false;
+        mMouseDown = false;
+        // this gui has focus so let's see if any of its components were interacted with //
+        if (mExpanded == false){
+            mGuiFooter->update();
+            mMouseDown = mGuiFooter->getMouseDown();
+        }   else{
+            bool hitComponent = false;
+            for (int i=0; i<items.size(); i++) {
+                if (hitComponent == false){
+                    items[i]->setMouseLocation(x, y);
+                    items[i]->update(true);
+                    if (items[i]->getFocused()) {
+                        hitComponent = true;
+                        mMouseDown = items[i]->getMouseDown();
+                        if (mGuiHeader != nullptr && mGuiHeader->getDraggable() && mGuiHeader->getFocused()){
+                            // track that we're moving to force preserve focus //
+                            mMoving = true;
+                            ofPoint mouse = ofPoint(x, y);
+                            moveGui(mouse - mGuiHeader->getDragOffset());
+                        }
+                    }   else if (items[i]->getIsExpanded()){
+                        // check if one of its children has focus //
+                        for (int j=0; j<items[i]->children.size(); j++) {
+                            if (items[i]->children[j]->getFocused()){
+                                hitComponent = true;
+                                mMouseDown = items[i]->children[j]->getMouseDown();
+                                break;
+                            }
+                        }
+                    }
+                }   else{
+                    // update component but ignore mouse & keyboard events //
+                    items[i]->setMouseLocation(x,y);
+                    items[i]->update(false);
+                    if (items[i]->getFocused()) items[i]->setFocused(false);
+                }
+            }
+        }
+    }
+// empty the trash //
+    for (int i=0; i<trash.size(); i++) delete trash[i];
+    trash.clear();
+}
+
+
 void ofxDatGui::update()
 {
     if (!mVisible) return;
@@ -851,7 +935,10 @@ void ofxDatGui::update()
 
     if (!getFocused() || !mEnabled){
     // update children but ignore mouse & keyboard events //
-        for (int i=0; i<items.size(); i++) items[i]->update(false);
+        for (int i=0; i<items.size(); i++) {
+            items[i]->update(false);
+
+        }
     }   else {
         mMoving = false;
         mMouseDown = false;
